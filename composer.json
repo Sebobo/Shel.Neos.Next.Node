@@ -2,6 +2,7 @@
     "name": "shel/neos-next-node",
     "description": "Neos Ui plugin to simplify creation of the next content element",
     "type": "neos-plugin",
+    "license": "MIT",
     "require": {
         "neos/neos": "^8.3",
         "neos/neos-ui": "^8.3"
