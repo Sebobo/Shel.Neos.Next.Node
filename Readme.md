@@ -1,6 +1,6 @@
 # Neos CMS Ui plugin to quickly create a follow up content element while editing a page
 
-This plugin allows defining other nodetypes as "next" nodetypes, which can be used to quickly create a follow up content element while editing a page in the Neos CMS backend.
+This plugin allows defining other nodetypes as "next" nodetypes, which can be used to quickly create a follow-up content element while editing a page in the Neos CMS backend.
 
 ## Installation
 
@@ -11,12 +11,16 @@ composer require shel/neos-next-node
 ## Example configuration
 
 ```yaml
-TODO
+'Neos.Demo:Content.Text':
+  options:
+    nextNodeTypes:
+      'Neos.Demo:Content.Text': true
+      'Neos.Demo:Content.Image': true
 ```
 
 This would lead to the following additional buttons in the Neos CMS backend:
 
-TODO: Add screenshot of the buttons
+![Example of the buttons in the Neos CMS backend](./Example.png)
 
 ## Development — Build a new version
 
