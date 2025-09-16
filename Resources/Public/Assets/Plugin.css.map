@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../ui-plugin/src/features/AddNextNodeToolBar.module.css"],
+  "sourcesContent": [".addNextNodeButtons {\n    display: flex;\n    float: left;\n    border-right: 1px solid #3f3f3f;\n\n    &:not(:first-child) {\n        border-left: 1px solid #3f3f3f;\n    }\n}\n\n.addNextNodeButton {\n    padding-left: 0;\n    padding-right: 0;\n}\n"],
+  "mappings": "AAAA,CAACA,EACG,QAAS,KACT,MAAO,KACP,aAAc,IAAI,MAAM,QAExB,CAAC,KAAK,cACF,YAAa,IAAI,MAAM,OAC3B,CACJ,CAEA,CAACC,EACG,aAAc,EACd,cAAe,CACnB",
+  "names": ["addNextNodeButtons", "addNextNodeButton"]
+}
