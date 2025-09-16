@@ -1,0 +1,15 @@
+Neos:
+  Neos:
+    userInterface:
+      translation:
+        autoInclude:
+          Shel.Neos.Next.Node:
+            - Main
+    Ui:
+      resources:
+        javascript:
+          'Shel.Neos.Next.Node:ToolBar':
+            resource: resource://Shel.Neos.Next.Node/Public/Assets/Plugin.js
+    fusion:
+      autoInclude:
+        'Shel.Neos.Next.Node': true

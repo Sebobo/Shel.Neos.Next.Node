@@ -1,0 +1,14 @@
+.addNextNodeButtons {
+    display: flex;
+    float: left;
+    border-right: 1px solid #3f3f3f;
+
+    &:not(:first-child) {
+        border-left: 1px solid #3f3f3f;
+    }
+}
+
+.addNextNodeButton {
+    padding-left: 0;
+    padding-right: 0;
+}

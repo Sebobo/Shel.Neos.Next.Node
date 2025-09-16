@@ -1,0 +1,9 @@
+prototype(Neos.Neos:Page) {
+    head.guestFrameApplication.@process.appendShelNextNodePluginStyles = afx`
+        {value}
+        <link
+            rel="stylesheet"
+            href={StaticResource.uri('Shel.Neos.Next.Node', 'Public/Assets/Plugin.css')}
+        />
+    `
+}

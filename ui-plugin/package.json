@@ -1,0 +1,28 @@
+{
+  "name": "@shel/neos-next-node",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "node esbuild.js",
+    "watch": "node esbuild.js --watch"
+  },
+  "devDependencies": {
+    "@neos-project/neos-ui-extensibility": "~8.3.14",
+    "esbuild": "~0.25.8",
+    "eslint": "^9.33.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-react": "^7.37.5",
+    "prettier": "^3.6.2"
+  },
+  "neos": {
+    "buildTargetDirectory": "../Resources/Public/JavaScript"
+  },
+  "packageManager": "yarn@4.9.2",
+  "prettier": {
+    "printWidth": 120,
+    "semi": true,
+    "singleQuote": true,
+    "tabWidth": 4
+  }
+}

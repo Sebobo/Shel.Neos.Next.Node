@@ -1,0 +1,5 @@
+Neos:
+  Neos:
+    Ui:
+      frontendConfiguration:
+        'Shel.Neos.Next.Node:ToolBar': {}

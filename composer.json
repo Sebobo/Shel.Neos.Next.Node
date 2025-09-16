@@ -1,0 +1,19 @@
+{
+    "name": "shel/neos-next-node",
+    "description": "Neos Ui plugin to simplify creation of the next content element",
+    "type": "neos-plugin",
+    "require": {
+        "neos/neos": "^8.3",
+        "neos/neos-ui": "^8.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Shel\\Neos\\Next\\Node\\": "Classes"
+        }
+    },
+    "extra": {
+        "neos": {
+            "package-key": "Shel.Neos.Next.Node"
+        }
+    }
+}
