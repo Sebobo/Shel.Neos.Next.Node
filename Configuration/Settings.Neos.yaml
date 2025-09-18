@@ -10,6 +10,11 @@ Neos:
         javascript:
           'Shel.Neos.Next.Node:ToolBar':
             resource: resource://Shel.Neos.Next.Node/Public/Assets/Plugin.js
+      frontendConfiguration:
+        hotkeys:
+          # The Neos mousetrap integration doesn't allow multiple hotkeys for a single action, so we declare two separate actions here
+          'Shel.Neos.Next.Node:createPrimary': 'command+enter'
+          'Shel.Neos.Next.Node:createSecondary': 'ctrl+enter'
     fusion:
       autoInclude:
         'Shel.Neos.Next.Node': true

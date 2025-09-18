@@ -22,6 +22,8 @@ This would lead to the following additional buttons in the Neos CMS backend:
 
 ![Example of the buttons in the Neos CMS backend](./Example.png)
 
+⚠️The default behaviour is to show the same nodetype as next nodetype. If you want to change this, you have to explicitly configure the `nextNodeTypes` option. This also means, that you only have to adjust this setting for a nodetype if you want a different behaviour than the default one.
+
 ## Development — Build a new version
 
 Run the following commands in the `ui-plugin` folder to build a new version of the plugin:
@@ -29,6 +31,12 @@ Run the following commands in the `ui-plugin` folder to build a new version of t
 ```console
 yarn
 yarn build
+```
+
+Or during development, run
+
+```console
+yarn watch
 ```
 
 ## Sponsors

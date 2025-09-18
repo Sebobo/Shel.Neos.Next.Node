@@ -1,15 +1,15 @@
-import React, { useCallback } from 'react';
+import React, { useMemo, useEffect, useCallback } from 'react';
 import { connect } from 'react-redux';
 
 import { selectors, actions } from '@neos-project/neos-ui-redux-store';
 import { Button, Icon } from '@neos-project/react-ui-components';
 import { neos } from '@neos-project/neos-ui-decorators';
 
+import { CREATE_NEXT_NODE_EVENT } from './Events';
+
 import style from './AddNextNodeToolBar.module.css';
 
 const withReduxState = connect((state) => ({
-    // TODO: Implement an actual selector to get the focused node's fusion path (not the only spot where we don't use selectors but the raw state in the UI)
-    focusedFusionPath: state?.cr?.nodes?.focused?.fusionPath,
     node: selectors.CR.Nodes.focusedSelector(state),
     getNodeByContextPath: selectors.CR.Nodes.nodeByContextPath(state)
 }), {
@@ -23,7 +23,7 @@ const withNeosGlobals = neos((globalRegistry) => ({
 
 const withPermissionContext = (component: React.FC) => withNeosGlobals(
     connect((_state, { nodeTypesRegistry }: { nodeTypesRegistry: NodeTypesRegistry }) => {
-        const isAllowedToAddChildOrSiblingNodesSelector = selectors.CR.Nodes.makeIsAllowedToAddChildOrSiblingNodes(nodeTypesRegistry);
+        const getAllowedSiblingNodeTypesSelector = selectors.CR.Nodes.makeGetAllowedSiblingNodeTypesSelector(nodeTypesRegistry);
 
         return (state) => {
             const focusedNodeContextPath = selectors.CR.Nodes.focusedNodePathSelector(state);
@@ -31,13 +31,14 @@ const withPermissionContext = (component: React.FC) => withNeosGlobals(
             const focusedNode = getNodeByContextPathSelector(state);
 
             const role = focusedNode ? (nodeTypesRegistry.hasRole(focusedNode.nodeType, 'document') ? 'document' : 'content') : null;
-            const isAllowedToAddChildOrSiblingNodes = isAllowedToAddChildOrSiblingNodesSelector(state, {
+            const allowedSiblingNodeTypes = focusedNode ? getAllowedSiblingNodeTypesSelector(state, {
                 reference: focusedNodeContextPath,
                 role
-            });
+            }) : [];
 
             return {
-                isAllowedToAddChildOrSiblingNodes
+                allowedSiblingNodeTypes,
+                isAllowedToAddChildOrSiblingNodes: allowedSiblingNodeTypes.length > 0
             };
         };
     }, {
@@ -49,6 +50,7 @@ type ComponentProps = {
     fusionPath: string;
     commenceNodeCreation: (contextPath: string, fusionPath: string, position: 'after' | 'before' | 'inside', nodeTypeName: string) => void;
     isAllowedToAddChildOrSiblingNodes: boolean;
+    allowedSiblingNodeTypes: string[];
     i18nRegistry: I18nRegistry;
     node: CRNode;
     nodeTypesRegistry: NodeTypesRegistry;
@@ -60,28 +62,26 @@ const makeAddNextNodeToolbar = (pluginConfiguration: PluginOptions) => {
                                                               fusionPath,
                                                               commenceNodeCreation,
                                                               isAllowedToAddChildOrSiblingNodes,
+                                                              allowedSiblingNodeTypes,
                                                               i18nRegistry,
                                                               node,
                                                               nodeTypesRegistry
                                                           }) => {
-        // Hide the button for auto created nodes like content collections
-        if (node.isAutoCreated) {
-            return null;
-        }
 
-        const nextNodeTypes: string[] = React.useMemo((): string[] => {
+        const nextNodeTypes: string[] = useMemo((): string[] => {
             const nodeType = node ? nodeTypesRegistry.getNodeType(node.nodeType) : [];
             let { nextNodeTypes } = nodeType.options;
 
-            // Default to the current node type if no nextNodeTypes are defined
-            if (!nextNodeTypes) {
-                nextNodeTypes = { [node.nodeType]: true };
-            }
-
-            return Object
+            // Filter out the next node types which are disabled or not allowed as sibling nodes
+            const nextNodeTypeCandidates = nextNodeTypes ? Object
                 .keys(nextNodeTypes)
-                .filter((nodeTypeName) => nextNodeTypes[nodeTypeName]);
-        }, [node?.nodeType]);
+                .filter((nodeTypeName) => {
+                    return nextNodeTypes[nodeTypeName] && allowedSiblingNodeTypes.includes(nodeTypeName);
+                }) : [];
+
+            // Default to the current node type if no candidates for the next node type are available
+            return nextNodeTypeCandidates.length > 0 ? nextNodeTypeCandidates : [node.nodeType];
+        }, [node?.nodeType, allowedSiblingNodeTypes]);
 
         // Callback to start the node creation process with the given node type already selected
         const handleCommenceNodeCreation = useCallback((nodeTypeName: string) => {
@@ -93,8 +93,38 @@ const makeAddNextNodeToolbar = (pluginConfiguration: PluginOptions) => {
             );
         }, [contextPath, fusionPath, commenceNodeCreation]);
 
-        // TODO: Add second colored plus icon on buttons
-        return (
+        useEffect(() => {
+            const contentWindow = document.querySelector('[name="neos-content-main"]')?.contentWindow;
+
+            if (node.isAutoCreated || !contentWindow) {
+                return;
+            }
+
+            // Create a listener to create the first candidate node when the event is fired (e.g. by the CKEditor plugin)
+            const createFirstCandidateListener = (e: Event) => {
+                if (nextNodeTypes.length === 0) {
+                    return;
+                }
+                if (e.type === CREATE_NEXT_NODE_EVENT) {
+                    handleCommenceNodeCreation(nextNodeTypes[0]);
+                }
+                if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                    e.stopImmediatePropagation();
+                    e.preventDefault();
+                    handleCommenceNodeCreation(nextNodeTypes[0]);
+                }
+            };
+
+            contentWindow.addEventListener(CREATE_NEXT_NODE_EVENT, createFirstCandidateListener);
+            contentWindow.addEventListener('keydown', createFirstCandidateListener, true);
+
+            return () => {
+                contentWindow.removeEventListener(CREATE_NEXT_NODE_EVENT, createFirstCandidateListener);
+                contentWindow.removeEventListener('keydown', createFirstCandidateListener, true);
+            };
+        }, [contextPath, handleCommenceNodeCreation]);
+
+        return !node.isAutoCreated ? (
             <div className={style.addNextNodeButtons} id="neos-InlineToolbar-AddNextNode">
                 {nextNodeTypes.map((nodeTypeName: string) => {
                     const nodeType = nodeTypesRegistry.getNodeType(nodeTypeName);
@@ -120,7 +150,7 @@ const makeAddNextNodeToolbar = (pluginConfiguration: PluginOptions) => {
                     ) : null;
                 })}
             </div>
-        );
+        ) : null;
     };
 
     return withReduxState(withPermissionContext(AddNextNodeToolBar as any));
