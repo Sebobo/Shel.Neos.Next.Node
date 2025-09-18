@@ -24,6 +24,13 @@ This would lead to the following additional buttons in the Neos CMS backend:
 
 ⚠️The default behaviour is to show the same nodetype as next nodetype. If you want to change this, you have to explicitly configure the `nextNodeTypes` option. This also means, that you only have to adjust this setting for a nodetype if you want a different behaviour than the default one.
 
+## Hotkeys
+
+The plugin also registers hotkeys for quickly creating a follow-up content element:
+
+* Ctrl + Enter
+* Cmd + Enter (Mac)
+
 ## Development — Build a new version
 
 Run the following commands in the `ui-plugin` folder to build a new version of the plugin:
