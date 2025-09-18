@@ -10,7 +10,7 @@ type I18nRegistry = {
         fallback?: string,
         params?: Record<string, unknown> | string[],
         packageKey?: string,
-        sourceName?: string
+        sourceName?: string,
     ) => string;
 };
 
@@ -33,8 +33,4 @@ type NodeTypesRegistry = {
         label: string;
     };
     hasRole: (nodeTypeName: string, role: string) => boolean;
-};
-
-type PluginOptions = {
-
 };

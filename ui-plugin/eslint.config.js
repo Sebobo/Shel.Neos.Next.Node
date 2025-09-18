@@ -4,6 +4,7 @@ const prettier = require('eslint-plugin-prettier');
 const react = require('eslint-plugin-react');
 const globals = require('globals');
 const js = require('@eslint/js');
+const tseslint = require('typescript-eslint');
 
 const { FlatCompat } = require('@eslint/eslintrc');
 
@@ -20,11 +21,11 @@ module.exports = defineConfig([
             parserOptions: {},
 
             globals: {
+                ...globals.browser,
                 ...globals.node,
             },
         },
-
-        extends: compat.extends('eslint:recommended', 'plugin:react/recommended', 'plugin:prettier/recommended'),
+        extends: compat.extends('plugin:react/recommended', 'plugin:prettier/recommended'),
 
         plugins: {
             prettier,
@@ -42,4 +43,5 @@ module.exports = defineConfig([
             'prettier/prettier': ['error'],
         },
     },
+    tseslint.configs.recommended,
 ]);

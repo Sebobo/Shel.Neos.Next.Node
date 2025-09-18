@@ -1,5 +1,10 @@
 {
   "compilerOptions": {
+    "lib": [
+      "es5",
+      "es6",
+      "dom"
+    ],
     "skipLibCheck": true,
     "target": "ES2019",
     "module": "ES2020",
@@ -13,13 +18,13 @@
         "name": "typescript-plugin-css-modules"
       }
     ],
-    "typeRoots": ["./ui-plugin/src/typings"]
+    "typeRoots": ["./src/typings"]
   },
   "exclude": [
     "node_modules",
     "Tests"
   ],
   "include": [
-    "ui-plugin/src/**/*"
+    "src/**/*"
   ]
 }
