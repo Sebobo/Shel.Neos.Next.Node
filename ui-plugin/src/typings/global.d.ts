@@ -34,3 +34,17 @@ type NodeTypesRegistry = {
     };
     hasRole: (nodeTypeName: string, role: string) => boolean;
 };
+
+type RenderContentOutOfBandFeedbackPayload = {
+    contextPath: string;
+    parentDomAddress?: {
+        contextPath: string;
+        fusionPath: string;
+    };
+    renderedContent: string;
+    siblingDomAddress?: {
+        contextPath: string;
+        fusionPath: string;
+    };
+    mode: 'before' | 'after' | 'replace';
+}
