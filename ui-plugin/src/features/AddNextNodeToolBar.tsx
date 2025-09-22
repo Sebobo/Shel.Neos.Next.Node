@@ -83,7 +83,7 @@ type ComponentProps = {
     nodeTypesRegistry: NodeTypesRegistry;
 };
 
-const makeAddNextNodeToolbar = () => {
+const makeAddNextNodeToolbar = (pluginConfiguration: PluginConfiguration) => {
     const AddNextNodeToolBar: React.FC<ComponentProps> = ({
         contextPath,
         fusionPath,
@@ -105,8 +105,14 @@ const makeAddNextNodeToolbar = () => {
                   })
                 : [];
 
-            // Default to the current node type if no candidates for the next node type are available
-            return nextNodeTypeCandidates.length > 0 ? nextNodeTypeCandidates : [node.nodeType];
+            if (nextNodeTypeCandidates.length > 0) {
+                return nextNodeTypeCandidates;
+            }
+            if (pluginConfiguration.currentNodeTypeAsFallback) {
+                // Default to the current node type if no candidates for the next node type are available
+                return [node.nodeType];
+            }
+            return [];
         }, [node?.nodeType, allowedSiblingNodeTypes]);
 
         // Callback to start the node creation process with the given node type already selected
@@ -125,18 +131,16 @@ const makeAddNextNodeToolbar = () => {
                 return;
             }
 
-            // Create a listener to create the first candidate node when the event is fired (e.g. by the CKEditor plugin)
+            // Create a listener to open the creation dialog with the first candidate preselected (if available) when the event is fired (e.g. by the CKEditor plugin)
             const createFirstCandidateListener = (e: KeyboardEvent) => {
-                if (nextNodeTypes.length === 0) {
-                    return;
-                }
+                const nextNodeType = nextNodeTypes.length > 0 ? nextNodeTypes[0] : null;
                 if (e.type === CREATE_NEXT_NODE_EVENT) {
-                    handleCommenceNodeCreation(nextNodeTypes[0]);
+                    handleCommenceNodeCreation(nextNodeType);
                 }
                 if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                     e.stopImmediatePropagation();
                     e.preventDefault();
-                    handleCommenceNodeCreation(nextNodeTypes[0]);
+                    handleCommenceNodeCreation(nextNodeType);
                 }
             };
 

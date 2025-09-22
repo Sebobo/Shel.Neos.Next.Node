@@ -31,6 +31,20 @@ The plugin also registers hotkeys for quickly creating a follow-up content eleme
 * Ctrl + Enter
 * Cmd + Enter (Mac)
 
+## Configuration options
+
+Copy the following configuration into your `Settings.yaml` to adjust the plugin's behaviour:
+
+```yaml
+Neos:
+  Neos:
+    Ui:
+      frontendConfiguration:
+        'Shel.Neos.Next.Node:ToolBar':
+          # If no `nextNodeTypes` is configured for a node type, the current node type will be used as fallback.
+          currentNodeTypeAsFallback: true
+```
+
 ## Development — Build a new version
 
 Run the following commands in the `ui-plugin` folder to build a new version of the plugin:

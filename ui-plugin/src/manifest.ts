@@ -12,7 +12,7 @@ manifest('Shel.Neos.Next.Node:ToolBar', {}, (globalRegistry, { frontendConfigura
     const guestFrameRegistry = globalRegistry.get('@neos-project/neos-ui-guest-frame');
     const ckEditorRegistry = globalRegistry.get('ckEditor5');
     const serverFeedbackHandlers = globalRegistry.get('serverFeedbackHandlers');
-    const pluginConfiguration = frontendConfiguration['Shel.Neos.Next.Node:ToolBar'];
+    const pluginConfiguration = frontendConfiguration['Shel.Neos.Next.Node:ToolBar'] as PluginConfiguration;
 
     // Create and register the toolbar component
     const Toolbar = makeNextNodeToolbar(pluginConfiguration);

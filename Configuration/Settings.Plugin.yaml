@@ -2,4 +2,6 @@ Neos:
   Neos:
     Ui:
       frontendConfiguration:
-        'Shel.Neos.Next.Node:ToolBar': {}
+        'Shel.Neos.Next.Node:ToolBar':
+          # If no `nextNodeTypes` is configured for a node type, the current node type will be used as fallback.
+          currentNodeTypeAsFallback: true

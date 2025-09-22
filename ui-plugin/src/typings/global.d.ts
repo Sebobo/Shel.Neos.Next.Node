@@ -35,6 +35,10 @@ type NodeTypesRegistry = {
     hasRole: (nodeTypeName: string, role: string) => boolean;
 };
 
+type PluginConfiguration = {
+    currentNodeTypeAsFallback: boolean;
+};
+
 type RenderContentOutOfBandFeedbackPayload = {
     contextPath: string;
     parentDomAddress?: {
@@ -47,4 +51,4 @@ type RenderContentOutOfBandFeedbackPayload = {
         fusionPath: string;
     };
     mode: 'before' | 'after' | 'replace';
-}
+};
