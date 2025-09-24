@@ -14,11 +14,13 @@ import { neos } from '@neos-project/neos-ui-decorators';
 import { CREATE_NEXT_NODE_EVENT } from './Events';
 
 import style from './AddNextNodeToolBar.module.css';
+import { useEventCallback } from '../helpers/hooks';
 
 const withReduxState = connect(
     (state: object) => ({
         node: selectors.CR.Nodes.focusedSelector(state),
         getNodeByContextPath: selectors.CR.Nodes.nodeByContextPath(state),
+        inspectorIsDirty: selectors.UI.Inspector.isDirty(state),
     }),
     {
         focusNode: actions.CR.Nodes.focus,
@@ -81,6 +83,7 @@ type ComponentProps = {
     i18nRegistry: I18nRegistry;
     node: CRNode;
     nodeTypesRegistry: NodeTypesRegistry;
+    inspectorIsDirty: boolean;
 };
 
 const makeAddNextNodeToolbar = (pluginConfiguration: PluginConfiguration) => {
@@ -93,6 +96,7 @@ const makeAddNextNodeToolbar = (pluginConfiguration: PluginConfiguration) => {
         i18nRegistry,
         node,
         nodeTypesRegistry,
+        inspectorIsDirty,
     }) => {
         const nextNodeTypes: string[] = useMemo((): string[] => {
             const nodeType = node ? nodeTypesRegistry.getNodeType(node.nodeType) : [];
@@ -116,11 +120,9 @@ const makeAddNextNodeToolbar = (pluginConfiguration: PluginConfiguration) => {
         }, [node?.nodeType, allowedSiblingNodeTypes]);
 
         // Callback to start the node creation process with the given node type already selected
-        const handleCommenceNodeCreation = useCallback(
-            (nodeTypeName: string) => {
-                commenceNodeCreation(contextPath, fusionPath, 'after', nodeTypeName);
-            },
-            [contextPath, fusionPath, commenceNodeCreation],
+        const handleCommenceNodeCreation = useEventCallback(
+            (nodeTypeName: string) =>
+                !inspectorIsDirty && commenceNodeCreation(contextPath, fusionPath, 'after', nodeTypeName),
         );
 
         useEffect(() => {
