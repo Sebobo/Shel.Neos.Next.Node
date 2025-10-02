@@ -4,7 +4,7 @@ declare module '*.module.scss';
 // ---------------------------
 // Types from the Neos UI core
 // ---------------------------
-type I18nRegistry = {
+interface I18nRegistry {
     translate: (
         id?: string,
         fallback?: string,
@@ -12,16 +12,17 @@ type I18nRegistry = {
         packageKey?: string,
         sourceName?: string,
     ) => string;
-};
+}
 
-type CRNode = {
+interface CRNode {
+    isAutoCreated: boolean;
     identifier: string;
     contextPath: string;
     name: string;
     nodeType: string;
-};
+}
 
-type NodeTypesRegistry = {
+interface NodeTypesRegistry {
     getNodeType: (nodeTypeName: string) => {
         nodeType: string;
         options?: {
@@ -33,13 +34,13 @@ type NodeTypesRegistry = {
         label: string;
     };
     hasRole: (nodeTypeName: string, role: string) => boolean;
-};
+}
 
-type PluginConfiguration = {
+interface PluginConfiguration {
     currentNodeTypeAsFallback: boolean;
-};
+}
 
-type RenderContentOutOfBandFeedbackPayload = {
+interface RenderContentOutOfBandFeedbackPayload {
     contextPath: string;
     parentDomAddress?: {
         contextPath: string;
@@ -51,4 +52,17 @@ type RenderContentOutOfBandFeedbackPayload = {
         fusionPath: string;
     };
     mode: 'before' | 'after' | 'replace';
-};
+}
+
+interface GlobalState {
+    system: object;
+    user: object;
+    cr: object;
+    ui: object;
+}
+
+interface CKEditor {
+    keystrokes: {
+        set: (keyCombination: string, command: (event, cancel) => void) => void;
+    };
+}

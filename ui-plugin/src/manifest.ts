@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
 import manifest from '@neos-project/neos-ui-extensibility';
-// @ts-ignore
+// @ts-expect-error
 import { findNodeInGuestFrame } from '@neos-project/neos-ui-guest-frame';
 
 import makeNextNodeToolbar from './features/AddNextNodeToolBar';
 import CKEditorPlugin from './features/CKEditorPlugin';
 import { actions } from './actions';
+
+const EDITABLE_FOCUS_DELAY = 10;
 
 manifest('Shel.Neos.Next.Node:ToolBar', {}, (globalRegistry, { frontendConfiguration }) => {
     const guestFrameRegistry = globalRegistry.get('@neos-project/neos-ui-guest-frame');
@@ -28,18 +30,16 @@ manifest('Shel.Neos.Next.Node:ToolBar', {}, (globalRegistry, { frontendConfigura
 
     // Register hotkeys to trigger next node creation from anywhere in the UI
     globalRegistry.get('hotkeys').set('Shel.Neos.Next.Node:createPrimary', {
-        description: 'Create next node',
-        action: actions.createNextNode,
+        action: actions.createNextNode, description: 'Create next node',
     });
     globalRegistry.get('hotkeys').set('Shel.Neos.Next.Node:createSecondary', {
-        description: 'Create next node',
-        action: actions.createNextNode,
+        action: actions.createNextNode, description: 'Create next node',
     });
 
     // After a new node was created, we try to focus the first initialized editable inside of it
     serverFeedbackHandlers.set(
         'Neos.Neos.Ui:RenderContentOutOfBand/NextNode',
-        async (feedbackPayload: RenderContentOutOfBandFeedbackPayload) => {
+        (feedbackPayload: RenderContentOutOfBandFeedbackPayload) => {
             const { contextPath, parentDomAddress } = feedbackPayload;
             // As we don't have a direct reference to the newly created node, we need to find it in the DOM
             const parentElement =
@@ -53,8 +53,7 @@ manifest('Shel.Neos.Next.Node:ToolBar', {}, (globalRegistry, { frontendConfigura
                 // Even though the element is marked as initialized, it might not be fully ready to be focused yet, so we wait a bit
                 setTimeout(() => {
                     firstInitializedEditable.focus();
-                    console.debug('Focusing first initialized editable in the new node', firstInitializedEditable);
-                }, 10);
+                }, EDITABLE_FOCUS_DELAY);
             }
         },
         'after Main',

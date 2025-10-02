@@ -1,82 +1,80 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-ignore
-import React, { useMemo, useEffect } from 'react';
-// @ts-ignore
+import React, { useEffect, useMemo } from 'react';
 import { connect } from 'react-redux';
 
-// @ts-ignore
-import { selectors, actions } from '@neos-project/neos-ui-redux-store';
-// @ts-ignore
+import type { SynchronousRegistry } from '@neos-project/neos-ui-extensibility';
+import { actions, selectors } from '@neos-project/neos-ui-redux-store';
 import { Button, Icon } from '@neos-project/react-ui-components';
-// @ts-ignore
 import { neos } from '@neos-project/neos-ui-decorators';
 
 import { CREATE_NEXT_NODE_EVENT } from './Events';
+import { useEventCallback } from '../helpers/hooks';
 
 import style from './AddNextNodeToolBar.module.css';
-import { useEventCallback } from '../helpers/hooks';
 
 const withReduxState = connect(
     (state: object) => ({
-        node: selectors.CR.Nodes.focusedSelector(state),
         getNodeByContextPath: selectors.CR.Nodes.nodeByContextPath(state),
         inspectorIsDirty: selectors.UI.Inspector.isDirty(state),
+        node: selectors.CR.Nodes.focusedSelector(state)
     }),
     {
         focusNode: actions.CR.Nodes.focus,
-        moveNodes: actions.CR.Nodes.moveMultiple,
-    },
+        moveNodes: actions.CR.Nodes.moveMultiple
+    }
 );
 
-const withNeosGlobals = neos((globalRegistry) => ({
-    nodeTypesRegistry: globalRegistry.get('@neos-project/neos-ui-contentrepository'),
+const withNeosGlobals = neos((globalRegistry: SynchronousRegistry<unknown>) => ({
+    nodeTypesRegistry: globalRegistry.get('@neos-project/neos-ui-contentrepository')
 }));
 
+// oxlint-disable-next-line explicit-function-return-type
 const withPermissionContext = (component: React.FC) =>
     withNeosGlobals(
         connect(
-            (_state, { nodeTypesRegistry }: { nodeTypesRegistry: NodeTypesRegistry }) => {
+            (_state: GlobalState, { nodeTypesRegistry }: { nodeTypesRegistry: NodeTypesRegistry }) => {
                 const getAllowedSiblingNodeTypesSelector =
                     selectors.CR.Nodes.makeGetAllowedSiblingNodeTypesSelector(nodeTypesRegistry);
 
-                return (state) => {
-                    const focusedNodeContextPath = selectors.CR.Nodes.focusedNodePathSelector(state);
+                return (state: GlobalState): {
+                    allowedSiblingNodeTypes: string[],
+                    isAllowedToAddChildOrSiblingNodes: boolean
+                } => {
+                    const focusedNodeContextPath: string = selectors.CR.Nodes.focusedNodePathSelector(state);
                     const getNodeByContextPathSelector =
                         selectors.CR.Nodes.makeGetNodeByContextPathSelector(focusedNodeContextPath);
                     const focusedNode = getNodeByContextPathSelector(state);
 
-                    const role = focusedNode
-                        ? nodeTypesRegistry.hasRole(focusedNode.nodeType, 'document')
-                            ? 'document'
-                            : 'content'
-                        : null;
-                    const allowedSiblingNodeTypes = focusedNode
-                        ? getAllowedSiblingNodeTypesSelector(state, {
-                              reference: focusedNodeContextPath,
-                              role,
-                          })
-                        : [];
-
+                    let allowedSiblingNodeTypes: string[] = [];
+                    if (focusedNode) {
+                        let role = 'content';
+                        if (nodeTypesRegistry.hasRole(focusedNode.nodeType, 'document')) {
+                            role = 'document';
+                        }
+                        allowedSiblingNodeTypes = getAllowedSiblingNodeTypesSelector(state, {
+                            reference: focusedNodeContextPath,
+                            role
+                        });
+                    }
                     return {
                         allowedSiblingNodeTypes,
-                        isAllowedToAddChildOrSiblingNodes: allowedSiblingNodeTypes.length > 0,
+                        isAllowedToAddChildOrSiblingNodes: allowedSiblingNodeTypes.length > 0
                     };
                 };
             },
             {
-                commenceNodeCreation: actions.CR.Nodes.commenceCreation,
-            },
-        )(component),
+                commenceNodeCreation: actions.CR.Nodes.commenceCreation
+            }
+        )(component)
     );
 
-type ComponentProps = {
+interface ComponentProps {
     contextPath: string;
     fusionPath: string;
     commenceNodeCreation: (
         contextPath: string,
         fusionPath: string,
         position: 'after' | 'before' | 'inside',
-        nodeTypeName: string,
+        nodeTypeName: string
     ) => void;
     isAllowedToAddChildOrSiblingNodes: boolean;
     allowedSiblingNodeTypes: string[];
@@ -84,30 +82,32 @@ type ComponentProps = {
     node: CRNode;
     nodeTypesRegistry: NodeTypesRegistry;
     inspectorIsDirty: boolean;
-};
+}
 
+// oxlint-disable-next-line explicit-function-return-type explicit-module-boundary-types
 const makeAddNextNodeToolbar = (pluginConfiguration: PluginConfiguration) => {
     const AddNextNodeToolBar: React.FC<ComponentProps> = ({
-        contextPath,
-        fusionPath,
-        commenceNodeCreation,
-        isAllowedToAddChildOrSiblingNodes,
-        allowedSiblingNodeTypes,
-        i18nRegistry,
-        node,
-        nodeTypesRegistry,
-        inspectorIsDirty,
-    }) => {
+                                                              contextPath,
+                                                              fusionPath,
+                                                              commenceNodeCreation,
+                                                              isAllowedToAddChildOrSiblingNodes,
+                                                              allowedSiblingNodeTypes,
+                                                              i18nRegistry,
+                                                              node,
+                                                              nodeTypesRegistry, inspectorIsDirty
+                                                          }) => {
         const nextNodeTypes: string[] = useMemo((): string[] => {
-            const nodeType = node ? nodeTypesRegistry.getNodeType(node.nodeType) : [];
+            if (!node?.nodeType) {
+                return [];
+            }
+            const nodeType = nodeTypesRegistry.getNodeType(node.nodeType);
             const { nextNodeTypes } = nodeType.options;
 
             // Filter out the next node types which are disabled or not allowed as sibling nodes
             const nextNodeTypeCandidates = nextNodeTypes
-                ? Object.keys(nextNodeTypes).filter((nodeTypeName) => {
-                      return nextNodeTypes[nodeTypeName] && allowedSiblingNodeTypes.includes(nodeTypeName);
-                  })
-                : [];
+                ? Object.keys(nextNodeTypes).filter((nodeTypeName) =>
+                    nextNodeTypes[nodeTypeName] && allowedSiblingNodeTypes.includes(nodeTypeName)
+                ) : [];
 
             if (nextNodeTypeCandidates.length > 0) {
                 return nextNodeTypeCandidates;
@@ -117,12 +117,12 @@ const makeAddNextNodeToolbar = (pluginConfiguration: PluginConfiguration) => {
                 return [node.nodeType];
             }
             return [];
-        }, [node?.nodeType, allowedSiblingNodeTypes]);
+        }, [node?.nodeType, allowedSiblingNodeTypes, nodeTypesRegistry]);
 
         // Callback to start the node creation process with the given node type already selected
         const handleCommenceNodeCreation = useEventCallback(
             (nodeTypeName: string) =>
-                !inspectorIsDirty && commenceNodeCreation(contextPath, fusionPath, 'after', nodeTypeName),
+                !inspectorIsDirty && commenceNodeCreation(contextPath, fusionPath, 'after', nodeTypeName)
         );
 
         useEffect(() => {
@@ -134,14 +134,17 @@ const makeAddNextNodeToolbar = (pluginConfiguration: PluginConfiguration) => {
             }
 
             // Create a listener to open the creation dialog with the first candidate preselected (if available) when the event is fired (e.g. by the CKEditor plugin)
-            const createFirstCandidateListener = (e: KeyboardEvent) => {
-                const nextNodeType = nextNodeTypes.length > 0 ? nextNodeTypes[0] : null;
-                if (e.type === CREATE_NEXT_NODE_EVENT) {
+            const createFirstCandidateListener = (event: KeyboardEvent): void => {
+                if (nextNodeTypes.length === 0) {
+                    return;
+                }
+                const [nextNodeType] = nextNodeTypes;
+                if (event.type === CREATE_NEXT_NODE_EVENT) {
                     handleCommenceNodeCreation(nextNodeType);
                 }
-                if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-                    e.stopImmediatePropagation();
-                    e.preventDefault();
+                if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+                    event.stopImmediatePropagation();
+                    event.preventDefault();
                     handleCommenceNodeCreation(nextNodeType);
                 }
             };
@@ -149,13 +152,13 @@ const makeAddNextNodeToolbar = (pluginConfiguration: PluginConfiguration) => {
             contentWindow.addEventListener(CREATE_NEXT_NODE_EVENT, createFirstCandidateListener);
             contentWindow.addEventListener('keydown', createFirstCandidateListener, true);
 
-            return () => {
+            return (): void => {
                 contentWindow.removeEventListener(CREATE_NEXT_NODE_EVENT, createFirstCandidateListener);
                 contentWindow.removeEventListener('keydown', createFirstCandidateListener, true);
             };
-        }, [contextPath, handleCommenceNodeCreation]);
+        }, [node, nextNodeTypes, contextPath, handleCommenceNodeCreation]);
 
-        return !node.isAutoCreated ? (
+        return node.isAutoCreated ? null : (
             <div className={style.addNextNodeButtons} id="neos-InlineToolbar-AddNextNode">
                 {nextNodeTypes.map((nodeTypeName: string, index: number) => {
                     const nodeType = nodeTypesRegistry.getNodeType(nodeTypeName);
@@ -163,15 +166,15 @@ const makeAddNextNodeToolbar = (pluginConfiguration: PluginConfiguration) => {
                     const tooltip =
                         index === 0
                             ? i18nRegistry.translate(
-                                  'Shel.Neos.Next.Node:Main:AddPrimaryNextNode',
-                                  `Create "${nodeTypeLabel}" as next element (Ctrl+Enter | Cmd + Enter)`,
-                                  { nodeTypeLabel },
-                              )
+                                'Shel.Neos.Next.Node:Main:AddPrimaryNextNode',
+                                `Create "${nodeTypeLabel}" as next element (Ctrl+Enter | Cmd + Enter)`,
+                                { nodeTypeLabel }
+                            )
                             : i18nRegistry.translate(
-                                  'Shel.Neos.Next.Node:Main:AddNextNode',
-                                  `Create "${nodeTypeLabel}" as next element`,
-                                  { nodeTypeLabel },
-                              );
+                                'Shel.Neos.Next.Node:Main:AddNextNode',
+                                `Create "${nodeTypeLabel}" as next element`,
+                                { nodeTypeLabel }
+                            );
                     return nodeType ? (
                         <Button
                             key={nodeTypeName}
@@ -189,7 +192,7 @@ const makeAddNextNodeToolbar = (pluginConfiguration: PluginConfiguration) => {
                     ) : null;
                 })}
             </div>
-        ) : null;
+        );
     };
 
     return withReduxState(withPermissionContext(AddNextNodeToolBar as never));
