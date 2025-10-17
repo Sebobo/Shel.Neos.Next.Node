@@ -44,7 +44,9 @@ manifest('Shel.Neos.Next.Node:ToolBar', {}, (globalRegistry, { frontendConfigura
             // As we don't have a direct reference to the newly created node, we need to find it in the DOM
             const parentElement =
                 parentDomAddress && findNodeInGuestFrame(parentDomAddress.contextPath, parentDomAddress.fusionPath);
-            const newElement = parentElement.querySelector(`[data-__neos-node-contextpath="${contextPath}"]`);
+            const newElement = parentElement.querySelector(
+                `[data-__neos-node-contextpath="${CSS.escape(contextPath)}"]`,
+            );
             if (newElement) {
                 const firstInitializedEditable = newElement.querySelector('[data-neos-inline-editor-is-initialized]');
                 if (!firstInitializedEditable) {
@@ -53,7 +55,6 @@ manifest('Shel.Neos.Next.Node:ToolBar', {}, (globalRegistry, { frontendConfigura
                 // Even though the element is marked as initialized, it might not be fully ready to be focused yet, so we wait a bit
                 setTimeout(() => {
                     firstInitializedEditable.focus();
-                    console.debug('Focusing first initialized editable in the new node', firstInitializedEditable);
                 }, 10);
             }
         },
