@@ -53,7 +53,6 @@ manifest('Shel.Neos.Next.Node:ToolBar', {}, (globalRegistry, { frontendConfigura
                 // Even though the element is marked as initialized, it might not be fully ready to be focused yet, so we wait a bit
                 setTimeout(() => {
                     firstInitializedEditable.focus();
-                    console.debug('Focusing first initialized editable in the new node', firstInitializedEditable);
                 }, 10);
             }
         },
