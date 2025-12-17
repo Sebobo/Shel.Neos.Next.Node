@@ -32,6 +32,11 @@ const withNeosGlobals = neos((globalRegistry) => ({
     nodeTypesRegistry: globalRegistry.get('@neos-project/neos-ui-contentrepository'),
 }));
 
+// Detect whether Neos has the new smaller toolbars and adjust button size accordingly
+// @ts-ignore
+export const NEOS_91_OR_NEWER = parseInt(CKEDITOR_VERSION) >= 47;
+const BUTTON_SIZE = NEOS_91_OR_NEWER ? 'small' : 'regular';
+
 const withPermissionContext = (component: React.FC) =>
     withNeosGlobals(
         connect(
@@ -179,6 +184,7 @@ const makeAddNextNodeToolbar = (pluginConfiguration: PluginConfiguration) => {
                             disabled={!isAllowedToAddChildOrSiblingNodes}
                             onClick={() => handleCommenceNodeCreation(nodeTypeName)}
                             title={tooltip}
+                            size={BUTTON_SIZE}
                         >
                             <span className="fa-layers fa-fw">
                                 <Icon icon={nodeType.ui?.icon || 'plus'} hoverStyle="brand" size="lg" />
