@@ -105,6 +105,9 @@ const makeAddNextNodeToolbar = (pluginConfiguration: PluginConfiguration) => {
     }) => {
         const nextNodeTypes: string[] = useMemo((): string[] => {
             const nodeType = node ? nodeTypesRegistry.getNodeType(node.nodeType) : [];
+            if (!nodeType) {
+                return [];
+            }
             const { nextNodeTypes } = nodeType.options;
 
             // Filter out the next node types which are disabled or not allowed as sibling nodes
